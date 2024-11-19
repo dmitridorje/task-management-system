@@ -14,8 +14,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -62,6 +65,7 @@ public class TaskController {
     @Operation(summary = "Create a new task", description = "Create a new task. Accessible only to admin users.")
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
     public TaskDto createTask(
             @RequestBody @Valid @Parameter(description = "Task data for the new task") TaskDto taskDto) {
         return taskService.createTask(taskDto);
@@ -97,6 +101,14 @@ public class TaskController {
             Authentication authentication) {
         User currentUser = getCurrentUser(authentication);
         return taskService.changeTaskStatus(taskId, statusChangeRequestDto, currentUser);
+    }
+
+    @Operation(summary = "Delete a task", description = "Delete a specific task. Accessible only to admin users.")
+    @DeleteMapping("/{taskId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTask(@PathVariable @Parameter(description = "ID of the task to delete") Long taskId) {
+        taskService.deleteTask(taskId);
     }
 
     private User getCurrentUser(Authentication authentication) {

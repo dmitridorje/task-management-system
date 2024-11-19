@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -108,6 +109,16 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus(TaskStatus.valueOf(statusChangeRequestDto.getStatus().toUpperCase()));
         taskRepository.save(task);
         return taskMapper.toTaskDto(task);
+    }
+
+    @Override
+    public void deleteTask(Long taskId) {
+        Optional<Task> task = taskRepository.findById(taskId);
+        if (task.isPresent()) {
+            taskRepository.deleteById(taskId);
+        } else {
+            throw new EntityNotFoundException("Task not found with ID " + taskId);
+        }
     }
 
     private Page<Task> getFilteredTasksFromRepository(TaskFilterDto taskFilterDto) {

@@ -27,7 +27,7 @@ public class DatabaseConfig {
 
         public static void main(String[] args) {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            String rawPassword = "admin";  // Это ваш исходный пароль
+            String rawPassword = "password";  // Это ваш исходный пароль
             String encodedPassword = encoder.encode(rawPassword);  // Закодированный пароль
             System.out.println(encodedPassword);
         }
