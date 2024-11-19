@@ -71,20 +71,11 @@ public class JwtServiceImpl implements JwtService {
         return generateToken(extraClaims, userDetails, expiration, jwtSigningKey);
     }
 
-//    private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration, String signingKey) {
-//        return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
-//                .setIssuedAt(new Date(System.currentTimeMillis()))
-//                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-//                .signWith(getSigningKey(signingKey), SignatureAlgorithm.HS256).compact();
-//    }
-
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration, String signingKey) {
-        // Извлечение ролей из UserDetails
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        // Добавление ролей в payload токена
         extraClaims.put("roles", roles);
 
         return Jwts.builder()
@@ -98,7 +89,7 @@ public class JwtServiceImpl implements JwtService {
 
     public List extractRoles(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.get("roles", List.class); // 'roles' - имя ключа с ролями в токене
+        return claims.get("roles", List.class);
     }
 
     private boolean isTokenExpired(String token) {

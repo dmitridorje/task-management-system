@@ -14,10 +14,10 @@ import java.util.List;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
-    List<Task> findByAssignee(User assignee);
 
+    @NonNull
+    Page<Task> findByAssignee(User assignee, @NonNull Pageable pageable);
 
-    // Метод findAll с аннотациями @NonNull
     @NonNull
     Page<Task> findAll(Specification<Task> specification, @NonNull Pageable pageable);
 }

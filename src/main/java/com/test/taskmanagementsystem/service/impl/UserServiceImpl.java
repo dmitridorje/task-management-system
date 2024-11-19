@@ -1,13 +1,10 @@
 package com.test.taskmanagementsystem.service.impl;
 
-import com.test.taskmanagementsystem.model.dto.NewUserDto;
-import com.test.taskmanagementsystem.model.entity.User;
 import com.test.taskmanagementsystem.repository.UserRepository;
 import com.test.taskmanagementsystem.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service

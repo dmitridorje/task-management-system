@@ -19,9 +19,7 @@ public class TaskAuthorFilter implements TaskFilter {
     public Specification<Task> toSpecification(TaskFilterDto filters) {
         return (root, query, criteriaBuilder) -> {
             if (filters.getAuthor() != null) {
-                // Создаем join с таблицей пользователей
                 Join<Task, User> authorJoin = root.join("author", JoinType.INNER);
-                // Добавляем условие для фильтрации по имени пользователя
                 return criteriaBuilder.equal(criteriaBuilder.lower(authorJoin.get("username")), filters.getAuthor().toLowerCase());
             }
             return criteriaBuilder.conjunction(); // Если фильтр по автору не задан, возвращаем пустое условие

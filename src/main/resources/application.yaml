@@ -27,12 +27,12 @@ spring:
 
 token:
   signing:
-    key: "mysupersecretkeyforjwtwhichis256bitlengthmysupersecretkeyforjwtwhichis256bitlength"
+    key: "mysupersecretkeyforjwtwhichis256bitlengthorjustappearstobeso"
   refresh:
     token:
       expiration: 2592000000
     signing:
-      key: "mysupersecretkeyforjwtwhichis256bitlengthmysupersecretkeyforjwtwhichis256bitlength"
+      key: "mysupersecretkeyforjwtwhichis256bitlengthorjustappearstobeso"
   access:
     token:
       expiration: 2592000000 # Set the expiration time for the access token in milliseconds (e.g., 1 hour)

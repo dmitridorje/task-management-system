@@ -19,12 +19,10 @@ public class TaskAssigneeFilter implements TaskFilter {
     public Specification<Task> toSpecification(TaskFilterDto filters) {
         return (root, query, criteriaBuilder) -> {
             if (filters.getAssignee() != null) {
-                // Создаем join с таблицей пользователей
                 Join<Task, User> assigneeJoin = root.join("assignee", JoinType.INNER);
-                // Добавляем условие для фильтрации по имени пользователя
                 return criteriaBuilder.equal(criteriaBuilder.lower(assigneeJoin.get("username")), filters.getAssignee().toLowerCase());
             }
-            return criteriaBuilder.conjunction(); // Если фильтр по автору не задан, возвращаем пустое условие
+            return criteriaBuilder.conjunction();
         };
     }
 }

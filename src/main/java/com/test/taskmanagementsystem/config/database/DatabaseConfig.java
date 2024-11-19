@@ -18,7 +18,8 @@ public class DatabaseConfig {
     //@Bean
     public CommandLineRunner init() {
         return args -> {
-            userRepository.save(new User("Tolga", "Caglayan", "admin", "$2a$12$qr2Wa5upWw2/EjJP05s85.jDXE2N9nJXjBbKKwucoHHzf5Y041sVm", Role.ADMIN));
+            userRepository.save(new User("admin", "adminych", "admin@example.com",
+                    "$2a$10$zox3PUE57yMowF7WnSBjK.lgfqWEskUNIvRjSs35h60i1BRyG/X0O", Role.ADMIN));
         };
     }
 
@@ -26,7 +27,7 @@ public class DatabaseConfig {
 
         public static void main(String[] args) {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            String rawPassword = "password";  // Это ваш исходный пароль
+            String rawPassword = "admin";  // Это ваш исходный пароль
             String encodedPassword = encoder.encode(rawPassword);  // Закодированный пароль
             System.out.println(encodedPassword);
         }

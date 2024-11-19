@@ -35,6 +35,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("io.github.wimdeblauwe:error-handling-spring-boot-starter:2.1.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 

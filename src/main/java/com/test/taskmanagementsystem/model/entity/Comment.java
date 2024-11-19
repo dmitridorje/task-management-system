@@ -51,4 +51,10 @@ public class Comment {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public Comment(String content, User author, Task task) {
+        this.content = content;
+        this.author = author;
+        this.task = task;
+    }
 }

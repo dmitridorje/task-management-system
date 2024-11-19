@@ -1,10 +1,12 @@
 package com.test.taskmanagementsystem.service.impl;
 
+import com.test.taskmanagementsystem.exception.UnauthorizedAccessException;
 import com.test.taskmanagementsystem.filter.TaskFilter;
 import com.test.taskmanagementsystem.mapper.TaskMapper;
-import com.test.taskmanagementsystem.model.CommentDto;
+import com.test.taskmanagementsystem.model.dto.CommentDto;
 import com.test.taskmanagementsystem.model.dto.TaskDto;
 import com.test.taskmanagementsystem.model.dto.TaskFilterDto;
+import com.test.taskmanagementsystem.model.entity.Comment;
 import com.test.taskmanagementsystem.model.entity.Task;
 import com.test.taskmanagementsystem.model.entity.User;
 import com.test.taskmanagementsystem.model.enums.TaskPriority;
@@ -13,20 +15,20 @@ import com.test.taskmanagementsystem.repository.TaskRepository;
 import com.test.taskmanagementsystem.repository.UserRepository;
 import com.test.taskmanagementsystem.service.TaskService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
@@ -34,38 +36,12 @@ public class TaskServiceImpl implements TaskService {
     private final UserRepository userRepository;
     private final List<TaskFilter> taskFilters;
 
-    public TaskServiceImpl(TaskRepository taskRepository,
-                           TaskMapper taskMapper,
-                           UserRepository userRepository,
-                           List<TaskFilter> taskFilters) {
-        this.taskRepository = taskRepository;
-        this.taskMapper = taskMapper;
-        this.userRepository = userRepository;
-        this.taskFilters = taskFilters;
-
-        log.info("TaskServiceImpl bean created with dependencies: TaskRepository={}, TaskMapper={}, UserRepository={}, TaskFilters={}",
-                taskRepository != null,
-                taskMapper != null,
-                userRepository != null,
-                taskFilters != null ? taskFilters.size() : 0);
-    }
-
     @Override
-    @Cacheable(value = "tasks", key = "#user.id")
-    public List<TaskDto> getTasksByUser(User user) {
-        log.info("Attempting to fetch tasks for user with ID: {}", user.getId());
+    public List<TaskDto> getTasksByUser(User currentUser, int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Task> tasks = taskRepository.findByAssignee(currentUser, pageable);
 
-        // Логируем, если кэш пуст и данные будут извлечены из базы
-        List<Task> tasks = taskRepository.findByAssignee(user);
-
-        // Логируем, что данные извлекаются из базы
-        log.info("Fetched {} tasks for user with ID: {}", tasks.size(), user.getId());
-
-        // Маппим задачи в TaskDto
-        List<TaskDto> taskDtos = taskMapper.toTaskDtoList(tasks);
-
-        // Возвращаем результат
-        return taskDtos;
+        return taskMapper.toTaskDtoListFromPage(tasks);
     }
 
     @Override
@@ -81,8 +57,20 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDto addComment(CommentDto commentDto, Long taskId) {
-        return null;
+    @Transactional
+    public TaskDto addComment(Long taskId, CommentDto commentDto, User currentUser) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new EntityNotFoundException("Task not found for id: " + taskId));
+
+        if ("USER".equals(currentUser.getRole().name()) && !task.getAssignee().equals(currentUser)) {
+            throw new UnauthorizedAccessException("You can only comment on tasks assigned to you.");
+        }
+
+        Comment comment = new Comment(commentDto.getContent(), currentUser, task);
+        task.getComments().add(comment);
+        taskRepository.save(task);
+
+        return taskMapper.toTaskDto(task);
     }
 
     @Override
@@ -90,28 +78,41 @@ public class TaskServiceImpl implements TaskService {
 
         Page<Task> filteredEvents = getFilteredTasksFromRepository(taskFilterDto);
 
-
-
         return taskMapper.toTaskDtoListFromPage(filteredEvents);
     }
 
-//    private Page<Task> getFilteredTasksFromRepository(TaskFilterDto taskFilterDto) {
-//        // Создаем Pageable объект на основе параметров фильтра
-//        Pageable pageable = PageRequest.of(taskFilterDto.getPage(), taskFilterDto.getPageSize());
-//
-//        Specification<Task> spec = taskFilters.stream()
-//                .filter(filter -> filter.isApplicable(taskFilterDto))
-//                .map(filter -> filter.toSpecification(taskFilterDto))
-//                .reduce(Specification::and)
-//                .orElse(null);
-//        return taskRepository.findAll(spec, pageable);
-//    }
+    @Override
+    public TaskDto updateTask(Long taskId, TaskDto requestDto) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new EntityNotFoundException("Task not found for id: " + taskId));
+
+        task.setTitle(requestDto.getTitle());
+        task.setDescription(requestDto.getDescription());
+        task.setStatus(TaskStatus.valueOf(requestDto.getStatus().toUpperCase()));
+        task.setPriority(TaskPriority.valueOf(requestDto.getPriority().toUpperCase()));
+        task.setAuthor(userRepository.findIdByFirstName(requestDto.getAuthor().getFirstName()));
+        task.setAssignee(userRepository.findIdByFirstName(requestDto.getAssignee().getFirstName()));
+
+        taskRepository.save(task);
+        return taskMapper.toTaskDto(task);
+    }
+
+    public TaskDto changeTaskStatus(Long taskId, TaskFilterDto statusChangeRequestDto, User currentUser) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new EntityNotFoundException("Task not found for id: " + taskId));
+
+        if ("USER".equals(currentUser.getRole().name()) && !task.getAssignee().equals(currentUser)) {
+            throw new UnauthorizedAccessException("You can only change status on tasks assigned to you.");
+        }
+
+        task.setStatus(TaskStatus.valueOf(statusChangeRequestDto.getStatus().toUpperCase()));
+        taskRepository.save(task);
+        return taskMapper.toTaskDto(task);
+    }
 
     private Page<Task> getFilteredTasksFromRepository(TaskFilterDto taskFilterDto) {
-        // Создаем Pageable объект на основе параметров фильтра
         Pageable pageable = PageRequest.of(taskFilterDto.getPage(), taskFilterDto.getPageSize());
 
-        // Собираем спецификации для всех фильтров
         Specification<Task> specification = Specification.where(null);
 
         for (TaskFilter filter : taskFilters) {
@@ -120,7 +121,6 @@ public class TaskServiceImpl implements TaskService {
             }
         }
 
-        // Выполняем запрос с пагинацией и фильтрацией
         return taskRepository.findAll(specification, pageable);
     }
 }

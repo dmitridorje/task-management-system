@@ -1,27 +1,28 @@
 package com.test.taskmanagementsystem.model.dto;
 
-import com.test.taskmanagementsystem.model.UserDto;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
-import java.time.LocalDateTime;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 public class TaskDto {
 
     private Long id;
-    @NonNull
+    @NotNull(message = "Field 'title' cannot be null.")
     private String title;
-    @NonNull
+    @NotNull(message = "Field 'description' cannot be null.")
     private String description;
-    @NonNull
+    @NotNull(message = "Field 'status' cannot be null.")
     private String status;
-    @NonNull
+    @NotNull(message = "Field 'priority' cannot be null.")
     private String priority;
     private UserDto author;
     private UserDto assignee;
+    List<CommentDto> comments;
     private String createdAt;
     private String updatedAt;
 }
