@@ -33,14 +33,12 @@ public class UserController {
 
     @GetMapping("/tasks")
     public ResponseEntity<List<TaskDto>> getUserTasks(@RequestHeader("Authorization") String authorizationHeader) {
-        // Извлекаем токен из заголовка
-        String token = authorizationHeader.substring(7); // Убираем "Bearer "
+        String token = authorizationHeader.substring(7);
+
+        User user = extractUserFromToken(token);
 
         String username = jwtService.extractUserName(token);
 
-        User user = userRepository.findByUsername(username).orElse(null);
-
-        // Получаем задачи пользователя по userId
         List<TaskDto> tasks = taskService.getTasksByUser(user);
 
         return ResponseEntity.ok(tasks);
@@ -50,5 +48,11 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMIN')")  // Ограничиваем доступ только для администраторов
     public User addUser(@Valid @RequestBody NewUserDto userDto) {
         return newUserService.createUser(userDto);
+    }
+
+    private User extractUserFromToken(String token) {
+        String username = jwtService.extractUserName(token);
+        User user = userRepository.findByUsername(username).orElse(null);
+        return user;
     }
 }
