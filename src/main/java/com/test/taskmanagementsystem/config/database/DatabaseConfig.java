@@ -17,11 +17,15 @@ public class DatabaseConfig {
     @Bean
     public CommandLineRunner init() {
         return args -> {
-            userRepository.save(new User("admin", "adminych", "admin@example.com",
-                    "$2a$10$zox3PUE57yMowF7WnSBjK.lgfqWEskUNIvRjSs35h60i1BRyG/X0O", Role.ADMIN));
+            if (userRepository.findByUsername("admin@example.com").isEmpty()) {
+                userRepository.save(new User("admin", "adminych", "admin@example.com",
+                        "$2a$10$zox3PUE57yMowF7WnSBjK.lgfqWEskUNIvRjSs35h60i1BRyG/X0O", Role.ADMIN));
+            }
 
-            userRepository.save(new User("user", "userovich", "user@example.com",
-                    "$2a$10$/DZ2UQRk.sJeEtTkETyq8.WkGqhuJVykS9NUiKN2iB3/Jllpk1.ki", Role.USER));
+            if (userRepository.findByUsername("user@example.com").isEmpty()) {
+                userRepository.save(new User("user", "userovich", "user@example.com",
+                        "$2a$10$/DZ2UQRk.sJeEtTkETyq8.WkGqhuJVykS9NUiKN2iB3/Jllpk1.ki", Role.USER));
+            }
         };
     }
 }
