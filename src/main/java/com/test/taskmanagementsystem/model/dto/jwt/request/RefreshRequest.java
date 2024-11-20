@@ -1,4 +1,4 @@
-package com.test.taskmanagementsystem.model.dto.request;
+package com.test.taskmanagementsystem.model.dto.jwt.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

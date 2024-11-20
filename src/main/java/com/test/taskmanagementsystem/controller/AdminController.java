@@ -1,6 +1,6 @@
 package com.test.taskmanagementsystem.controller;
 
-import com.test.taskmanagementsystem.model.dto.CreateUserDto;
+import com.test.taskmanagementsystem.model.dto.requestdtos.CreateUserDto;
 import com.test.taskmanagementsystem.model.dto.UserDto;
 import com.test.taskmanagementsystem.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;

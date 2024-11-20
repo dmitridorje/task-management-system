@@ -1,9 +1,9 @@
 package com.test.taskmanagementsystem.service.impl;
 
 import com.test.taskmanagementsystem.exception.RefreshTokenNotFoundException;
-import com.test.taskmanagementsystem.model.dto.request.RefreshRequest;
-import com.test.taskmanagementsystem.model.dto.request.SignInRequest;
-import com.test.taskmanagementsystem.model.dto.response.JwtAuthenticationResponse;
+import com.test.taskmanagementsystem.model.dto.jwt.request.RefreshRequest;
+import com.test.taskmanagementsystem.model.dto.jwt.request.SignInRequest;
+import com.test.taskmanagementsystem.model.dto.jwt.response.JwtAuthenticationResponse;
 import com.test.taskmanagementsystem.model.entity.Token;
 import com.test.taskmanagementsystem.repository.TokenRepository;
 import com.test.taskmanagementsystem.repository.UserRepository;

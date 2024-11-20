@@ -16,7 +16,7 @@ public class TaskFilterDto {
 
     private String titlePattern;
 
-    @Pattern(regexp = "^(PENDING|IN_PROGRESS|COMPLETED)$", message = "Status must be one of OPEN, IN_PROGRESS,COMPLETED")
+    @Pattern(regexp = "^(PENDING|IN_PROGRESS|COMPLETED)$", message = "Status must be one of PENDING, IN_PROGRESS, COMPLETED")
     private String status;
 
     @Pattern(regexp = "^(LOW|MEDIUM|HIGH)$", message = "Priority must be one of LOW, MEDIUM, HIGH")

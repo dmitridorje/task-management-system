@@ -26,6 +26,7 @@ import java.util.function.Function;
 @Service
 @RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
+
     private final TokenRepository tokenRepository;
 
     @Value("${token.signing.key}")

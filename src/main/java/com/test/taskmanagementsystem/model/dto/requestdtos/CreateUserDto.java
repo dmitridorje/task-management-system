@@ -1,5 +1,6 @@
-package com.test.taskmanagementsystem.model.dto;
+package com.test.taskmanagementsystem.model.dto.requestdtos;
 
+import com.test.taskmanagementsystem.model.dto.UserDto;
 import com.test.taskmanagementsystem.model.enums.Role;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

@@ -41,11 +41,9 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling(exception -> {
-                    exception.authenticationEntryPoint(
-                            new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
-                    );
-                })
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
+                ))
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
 
                 .authenticationProvider(authenticationProvider()).addFilterBefore(

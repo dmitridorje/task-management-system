@@ -20,11 +20,6 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
-  data:
-    redis:
-      port: 6379
-      host: localhost
-
 token:
   signing:
     key: "mysupersecretkeyforjwtwhichis256bitlengthorjustappearstobeso"
@@ -35,4 +30,4 @@ token:
       key: "mysupersecretkeyforjwtwhichis256bitlengthorjustappearstobeso"
   access:
     token:
-      expiration: 2592000000 # Set the expiration time for the access token in milliseconds (e.g., 1 hour)
+      expiration: 2592000000

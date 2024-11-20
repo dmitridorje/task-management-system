@@ -1,8 +1,9 @@
 package com.test.taskmanagementsystem.controller;
 
-import com.test.taskmanagementsystem.model.dto.CommentDto;
 import com.test.taskmanagementsystem.model.dto.TaskDto;
 import com.test.taskmanagementsystem.model.dto.TaskFilterDto;
+import com.test.taskmanagementsystem.model.dto.requestdtos.ChangeStatusDto;
+import com.test.taskmanagementsystem.model.dto.requestdtos.CreateCommentDto;
 import com.test.taskmanagementsystem.model.entity.User;
 import com.test.taskmanagementsystem.repository.UserRepository;
 import com.test.taskmanagementsystem.service.TaskService;
@@ -15,6 +16,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,16 +50,31 @@ public class TaskController {
         return taskService.getFilteredTasks(taskFilterDto);
     }
 
-    @Operation(summary = "Get user's tasks", description = "Fetch tasks for the authenticated user. Accessible only to regular users.")
+    @Operation(summary = "Get user's tasks",
+            description = "Fetch tasks for the authenticated user or for a specific user if called by an admin.")
     @GetMapping()
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public List<TaskDto> getUserTasks(
             @Valid @RequestParam @Min(value = 0, message = "Page index must be greater than or equal to 0")
             @Parameter(description = "Page number, starting from 0") int page,
             @Valid @RequestParam @Min(value = 1, message = "Page size must be greater than or equal to 1")
             @Parameter(description = "Number of items per page") int pageSize,
+            @RequestParam(required = false)
+            @Parameter(description = "ID of the user to fetch tasks for (admins only)") Long userId,
             Authentication authentication) {
-        User currentUser = getCurrentUser(authentication);
+
+        User currentUser;
+
+        if (userId != null) {
+            if (authentication.getAuthorities().stream()
+                    .noneMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
+                throw new AccessDeniedException("Only admins can fetch tasks for other users.");
+            }
+            currentUser = userRepository.getUserById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+        } else {
+            currentUser = getCurrentUser(authentication);
+        }
 
         return taskService.getTasksByUser(currentUser, page, pageSize);
     }
@@ -76,11 +93,10 @@ public class TaskController {
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public TaskDto addComment(
             @PathVariable @Parameter(description = "ID of the task to add a comment to") Long taskId,
-            @RequestBody @Parameter(description = "Data for the new comment") CommentDto commentDto,
+            @RequestBody @Parameter(description = "Data for the new comment") CreateCommentDto commentDto,
             Authentication authentication) {
-        User currentUser = getCurrentUser(authentication); // Получаем текущего пользователя
-        TaskDto updatedTask = taskService.addComment(taskId, commentDto, currentUser);
-        return updatedTask;
+        User currentUser = getCurrentUser(authentication);
+        return taskService.addComment(taskId, commentDto, currentUser);
     }
 
     @Operation(summary = "Update a task", description = "Update details of a specific task. Accessible only to admin users.")
@@ -92,12 +108,12 @@ public class TaskController {
         return taskService.updateTask(taskId, requestDto);
     }
 
-    @Operation(summary = "Change task status", description = "Change the status of a specific task. Accessible only to regular users.")
+    @Operation(summary = "Change task status", description = "Change the status of a specific task. Accessible to users and administrators.")
     @PatchMapping("/{taskId}/status")
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public TaskDto changeTaskStatus(
             @PathVariable @Parameter(description = "ID of the task to change status") Long taskId,
-            @RequestBody @Parameter(description = "Data for status change") TaskFilterDto statusChangeRequestDto,
+            @RequestBody @Parameter(description = "Data for status change") ChangeStatusDto statusChangeRequestDto,
             Authentication authentication) {
         User currentUser = getCurrentUser(authentication);
         return taskService.changeTaskStatus(taskId, statusChangeRequestDto, currentUser);
@@ -115,5 +131,4 @@ public class TaskController {
         String username = authentication.getName();
         return userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
-
 }

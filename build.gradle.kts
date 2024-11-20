@@ -44,7 +44,8 @@ dependencies {
     /**
      * Database
      */
-    implementation("redis.clients:jedis:4.3.2")
+    implementation("org.liquibase:liquibase-core")
+    implementation ("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     runtimeOnly("org.postgresql:postgresql")
 
     /**
@@ -91,6 +92,11 @@ tasks.test {
     useJUnitPlatform()
 }
 
+springBoot {
+    mainClass = "com.test.taskmanagementsystem.TaskManagementSystemApplication"
+}
+
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
@@ -98,5 +104,6 @@ tasks.withType<Test> {
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
 
 tasks.bootJar {
-    archiveFileName.set("service.jar")
+    archiveFileName.set("TaskManagementSystem.jar")
 }
+

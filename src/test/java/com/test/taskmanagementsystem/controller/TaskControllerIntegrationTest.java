@@ -5,8 +5,8 @@ import com.test.taskmanagementsystem.model.dto.CommentDto;
 import com.test.taskmanagementsystem.model.dto.TaskDto;
 import com.test.taskmanagementsystem.model.dto.TaskFilterDto;
 import com.test.taskmanagementsystem.model.dto.UserDto;
-import com.test.taskmanagementsystem.model.dto.request.SignInRequest;
-import com.test.taskmanagementsystem.model.dto.response.JwtAuthenticationResponse;
+import com.test.taskmanagementsystem.model.dto.jwt.request.SignInRequest;
+import com.test.taskmanagementsystem.model.dto.jwt.response.JwtAuthenticationResponse;
 import com.test.taskmanagementsystem.model.entity.Task;
 import com.test.taskmanagementsystem.model.enums.TaskPriority;
 import com.test.taskmanagementsystem.model.enums.TaskStatus;
@@ -20,7 +20,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -281,7 +280,7 @@ public class TaskControllerIntegrationTest {
                         .header(HttpHeaders.AUTHORIZATION, adminToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Entity Not Found"))
-                .andExpect(jsonPath("$.message").value("Task not found with ID " + taskId));
+                .andExpect(jsonPath("$.message").value("Task not found with ID: " + taskId));
     }
 
     private String getAdminToken() throws Exception {

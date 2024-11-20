@@ -22,7 +22,7 @@ public class TaskAuthorFilter implements TaskFilter {
                 Join<Task, User> authorJoin = root.join("author", JoinType.INNER);
                 return criteriaBuilder.equal(criteriaBuilder.lower(authorJoin.get("username")), filters.getAuthor().toLowerCase());
             }
-            return criteriaBuilder.conjunction(); // Если фильтр по автору не задан, возвращаем пустое условие
+            return criteriaBuilder.conjunction();
         };
     }
 }

@@ -20,6 +20,7 @@ public class TaskDto {
     private String status;
     @NotNull(message = "Field 'priority' cannot be null.")
     private String priority;
+    @NotNull(message = "Field 'author' cannot be null.")
     private UserDto author;
     private UserDto assignee;
     List<CommentDto> comments;

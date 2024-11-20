@@ -10,21 +10,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -54,16 +49,6 @@ public class GlobalRestExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Validation Error", readableMessage));
     }
 
-    private String parseConstraintViolationMessage(DataIntegrityViolationException ex) {
-        String message = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
-        if (message != null && message.contains("null value in column")) {
-            // Извлечение читаемого сообщения
-            String columnName = message.split("\"")[1]; // Получаем название колонки
-            return "Field '" + columnName + "' cannot be null. Please provide a valid value.";
-        }
-        return "A data integrity violation occurred.";
-    }
-
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
@@ -84,7 +69,6 @@ public class GlobalRestExceptionHandler {
         log.error("Invalid Input Format: {}", ex.getMessage());
         return new ErrorResponse("Invalid Input Format", ex.getMessage());
     }
-
 
     @ExceptionHandler(ResponseStatusException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -131,5 +115,14 @@ public class GlobalRestExceptionHandler {
     public ErrorResponse handleAllOtherExceptions(Exception ex) {
         log.error("Exception", ex);
         return new ErrorResponse("Exception", ex.getMessage());
+    }
+
+    private String parseConstraintViolationMessage(DataIntegrityViolationException ex) {
+        String message = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
+        if (message != null && message.contains("null value in column")) {
+            String columnName = message.split("\"")[1];
+            return "Field '" + columnName + "' cannot be null. Please provide a valid value.";
+        }
+        return "A data integrity violation occurred.";
     }
 }

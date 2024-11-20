@@ -30,7 +30,7 @@ public class Token {
     User user;
     Boolean isActive;
 
-    public Token(String jwt, String refreshToken, Date expiresAt, User user,Boolean isActive) {
+    public Token(String jwt, String refreshToken, Date expiresAt, User user, Boolean isActive) {
         this.token = jwt;
         this.refreshToken = refreshToken;
         this.expiresAt = expiresAt;

@@ -8,9 +8,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
@@ -20,4 +22,7 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
 
     @NonNull
     Page<Task> findAll(Specification<Task> specification, @NonNull Pageable pageable);
+
+    @Query("SELECT t FROM Task t LEFT JOIN FETCH t.comments WHERE t.id = :taskId")
+    Optional<Task> findByIdWithComments(@Param("taskId") Long taskId);
 }

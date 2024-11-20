@@ -7,29 +7,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-//@Configuration
+@Configuration
 @RequiredArgsConstructor
 public class DatabaseConfig {
     private final UserRepository userRepository;
 
 
-    //@Bean
+    @Bean
     public CommandLineRunner init() {
         return args -> {
             userRepository.save(new User("admin", "adminych", "admin@example.com",
                     "$2a$10$zox3PUE57yMowF7WnSBjK.lgfqWEskUNIvRjSs35h60i1BRyG/X0O", Role.ADMIN));
+
+            userRepository.save(new User("user", "userovich", "user@example.com",
+                    "$2a$10$/DZ2UQRk.sJeEtTkETyq8.WkGqhuJVykS9NUiKN2iB3/Jllpk1.ki", Role.USER));
         };
     }
-
-
-
-        public static void main(String[] args) {
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            String rawPassword = "password";  // Это ваш исходный пароль
-            String encodedPassword = encoder.encode(rawPassword);  // Закодированный пароль
-            System.out.println(encodedPassword);
-        }
 }
 

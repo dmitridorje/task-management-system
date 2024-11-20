@@ -3,9 +3,10 @@ package com.test.taskmanagementsystem.service.impl;
 import com.test.taskmanagementsystem.exception.UnauthorizedAccessException;
 import com.test.taskmanagementsystem.filter.TaskFilter;
 import com.test.taskmanagementsystem.mapper.TaskMapper;
-import com.test.taskmanagementsystem.model.dto.CommentDto;
 import com.test.taskmanagementsystem.model.dto.TaskDto;
 import com.test.taskmanagementsystem.model.dto.TaskFilterDto;
+import com.test.taskmanagementsystem.model.dto.requestdtos.ChangeStatusDto;
+import com.test.taskmanagementsystem.model.dto.requestdtos.CreateCommentDto;
 import com.test.taskmanagementsystem.model.entity.Comment;
 import com.test.taskmanagementsystem.model.entity.Task;
 import com.test.taskmanagementsystem.model.entity.User;
@@ -30,8 +31,8 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class TaskServiceImpl implements TaskService {
+
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
     private final UserRepository userRepository;
@@ -46,22 +47,28 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public TaskDto createTask(TaskDto taskDto) {
         Task task = new Task();
         task.setTitle(taskDto.getTitle());
         task.setDescription(taskDto.getDescription());
-        task.setStatus(TaskStatus.valueOf(taskDto.getStatus().toUpperCase())); // Конвертация строки в Enum
-        task.setPriority(TaskPriority.valueOf(taskDto.getPriority().toUpperCase())); // Аналогично
+        task.setStatus(TaskStatus.valueOf(taskDto.getStatus().toUpperCase()));
+        task.setPriority(TaskPriority.valueOf(taskDto.getPriority().toUpperCase()));
         task.setAuthor(userRepository.findIdByFirstName(taskDto.getAuthor().getFirstName()));
         task.setAssignee(userRepository.findIdByFirstName(taskDto.getAssignee().getFirstName()));
-        return taskMapper.toTaskDto(taskRepository.save(task));
+
+        Task savedTask = taskRepository.save(task);
+
+        return taskMapper.toTaskDto(savedTask);
     }
 
     @Override
     @Transactional
-    public TaskDto addComment(Long taskId, CommentDto commentDto, User currentUser) {
+    public TaskDto addComment(Long taskId, CreateCommentDto commentDto, User currentUser) {
+
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new EntityNotFoundException("Task not found for id: " + taskId));
+                .orElseThrow(() -> new EntityNotFoundException("Task not found with ID: " + taskId));
+
 
         if ("USER".equals(currentUser.getRole().name()) && !task.getAssignee().equals(currentUser)) {
             throw new UnauthorizedAccessException("You can only comment on tasks assigned to you.");
@@ -84,8 +91,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskDto updateTask(Long taskId, TaskDto requestDto) {
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new EntityNotFoundException("Task not found for id: " + taskId));
+        Task task = taskRepository.findByIdWithComments(taskId)
+                .orElseThrow(() -> new EntityNotFoundException("Task not found with ID: " + taskId));
 
         task.setTitle(requestDto.getTitle());
         task.setDescription(requestDto.getDescription());
@@ -95,12 +102,14 @@ public class TaskServiceImpl implements TaskService {
         task.setAssignee(userRepository.findIdByFirstName(requestDto.getAssignee().getFirstName()));
 
         taskRepository.save(task);
+
         return taskMapper.toTaskDto(task);
     }
 
-    public TaskDto changeTaskStatus(Long taskId, TaskFilterDto statusChangeRequestDto, User currentUser) {
+    public TaskDto changeTaskStatus(Long taskId, ChangeStatusDto statusChangeRequestDto, User currentUser) {
+
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new EntityNotFoundException("Task not found for id: " + taskId));
+                .orElseThrow(() -> new EntityNotFoundException("Task not found with ID: " + taskId));
 
         if ("USER".equals(currentUser.getRole().name()) && !task.getAssignee().equals(currentUser)) {
             throw new UnauthorizedAccessException("You can only change status on tasks assigned to you.");
@@ -108,16 +117,18 @@ public class TaskServiceImpl implements TaskService {
 
         task.setStatus(TaskStatus.valueOf(statusChangeRequestDto.getStatus().toUpperCase()));
         taskRepository.save(task);
+
         return taskMapper.toTaskDto(task);
     }
 
     @Override
+    @Transactional
     public void deleteTask(Long taskId) {
         Optional<Task> task = taskRepository.findById(taskId);
         if (task.isPresent()) {
             taskRepository.deleteById(taskId);
         } else {
-            throw new EntityNotFoundException("Task not found with ID " + taskId);
+            throw new EntityNotFoundException("Task not found with ID: " + taskId);
         }
     }
 
