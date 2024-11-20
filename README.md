@@ -11,9 +11,9 @@ Mapstruct
 <h4>Инструкция по локальному запуску:</h4> 
 1) Клонируйте репозиторий <br>
    Выполните следующую команду в терминале:<br>
-   git clone https://github.com/dmitridorje/task-management-system.git
-   2) Запустите докер-контейнер с PostgreSQL<br>
-      Существует два способа запуска: вручную или с помощью скриптов.
+   git clone https://github.com/dmitridorje/task-management-system.git<br>
+2) Запустите докер-контейнер с PostgreSQL<br>
+   Существует два способа запуска: вручную или с помощью скриптов.
 
    а) Запуск через скрипт:<br>
    В корне проекта есть скрипт run.sh. Просто выполните в консоли:<br>
@@ -24,7 +24,7 @@ Mapstruct
    docker-compose build<br>
    docker-compose up -d
 
-   PostgreSQL будет доступен на localhost:5432.
+   PostgreSQL будет доступен на localhost:5432.<br>
 3) Выполните сборку приложения:<br>
    ./gradlew build
 4) Запустите приложение:<br>
