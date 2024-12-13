@@ -1,50 +1,84 @@
-<h2>Разработка системы управления задачами</h2>
+# Разработка системы управления задачами
 
-<h3>Использованные технологии:</h3>
-Spring Boot,<br>
-Java 17,<br>
-PostgreSQL,<br>
-Docker,<br>
-Liquibase,<br>
-Mapstruct
+## Использованные технологии
+- Spring Boot
+- Java 17
+- PostgreSQL
+- Docker
+- Liquibase
+- MapStruct
 
-<h4>Инструкция по локальному запуску:</h4> 
-1) Клонируйте репозиторий <br>
-   Выполните следующую команду в терминале:<br>
-   git clone https://github.com/dmitridorje/task-management-system.git<br>
-2) Запустите докер-контейнер с PostgreSQL<br>
-   Существует два способа запуска: вручную или с помощью скриптов.
+## Инструкция по локальному запуску
 
-   а) Запуск через скрипт:<br>
-   В корне проекта есть скрипт run.sh. Просто выполните в консоли:<br>
-   ./run.sh<br>
-   б) Ручной запуск:<br>
-   Если вы хотите запустить проект вручную:
+### 1. Клонирование репозитория
+Клонируйте репозиторий с помощью команды:
+```bash
+git clone https://github.com/dmitridorje/task-management-system.git
+```
 
-   docker-compose build<br>
-   docker-compose up -d
+### 2. Запуск Docker-контейнера с PostgreSQL
 
-   PostgreSQL будет доступен на localhost:5432.<br>
-3) Выполните сборку приложения:<br>
-   ./gradlew build
-4) Запустите приложение:<br>
-   java -jar build/libs/TaskManagementSystem.jar
+#### Способ 1: Запуск через скрипт
+В корне проекта выполните следующий скрипт:
+```bash
+./run.sh
+```
 
-При первом запуске в  базу данных будут добавлены два пользователя:<br>
-username: admin@example.com<br>
-password: admin<br>
+#### Способ 2: Ручной запуск
+Если вы хотите настроить контейнер вручную:
+```bash
+docker-compose build
+docker-compose up -d
+```
+PostgreSQL будет доступен на `localhost:5432`.
 
-username: user@example.com<br>
-password: password<br>
+### 3. Сборка приложения
+Выполните команду:
+```bash
+./gradlew build
+```
 
-5) Далее можно перейти либо в Swagger-UI по адресу http://localhost:8080/swagger-ui/index.html, либо работать с приложением через Postman.
-В любом случае сначала необходимо сгенерировать токен:<br>
-   POST /api/v1/auth/login<br>
-В теле запроса нужно как раз передать данные одного из пользователей, созданного при запуске:<br>
-   {
-      "username": "yourUsername",
-      "password": "yourPassword"
-   }<br>
-В ответе вы получите токен, который затем можно использовать для доступа к защищённым точкам.
-В Postman необходимо его добавлять через Authorization Bearer Token, в Swagger-UI настроена авторизация через поле Authorize.
+### 4. Запуск приложения
+Запустите собранный JAR-файл:
+```bash
+java -jar build/libs/TaskManagementSystem.jar
+```
+
+### 5. Доступ к приложению
+При первом запуске в базу данных добавятся два пользователя:
+
+- **Admin**:
+  - Логин: `admin@example.com`
+  - Пароль: `admin`
+- **User**:
+  - Логин: `user@example.com`
+  - Пароль: `password`
+
+Приложение доступно по следующим адресам:
+
+- [Swagger-UI](http://localhost:8080/swagger-ui/index.html)
+- Работа через Postman или любой другой инструмент.
+
+### 6. Авторизация
+Для работы с защищёнными точками API необходимо сгенерировать токен:
+
+#### Шаг 1: Авторизация
+Выполните запрос:
+```http
+POST /api/v1/auth/login
+```
+Тело запроса:
+```json
+{
+  "username": "yourUsername",
+  "password": "yourPassword"
+}
+```
+
+#### Шаг 2: Использование токена
+В ответе вы получите токен, который можно использовать для доступа к защищённым точкам API.
+- **Postman**: добавьте токен в раздел "Authorization" с типом "Bearer Token".
+- **Swagger-UI**: нажмите на кнопку "Authorize" и введите токен в соответствующее поле.
+
+
 
